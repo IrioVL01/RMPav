@@ -51,7 +51,7 @@ function App() {
     if (listaVeiculos.length === 0) return alert("Adicione veículos.")
     const dados = { anos: parseInt(anos), taxa_crescimento: parseFloat(taxa), fator_faixa: parseFloat(fatorFaixa), veiculos: listaVeiculos }
     try {
-      const res = await fetch('${API_URL}/api/calcular-trafego/', {
+      const res = await fetch(`${API_URL}/api/calcular-trafego/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
@@ -65,7 +65,7 @@ function App() {
     const vdmTotal = listaVeiculos.reduce((acc, item) => acc + item.vdm, 0)
     const dados = { cbr_subleito: parseFloat(cbr), vdm_medio: vdmTotal, anos_projeto: parseInt(anos), clima: clima }
     try {
-        const res = await fetch('${API_URL}/api/calcular-dimensionamento/', {
+        const res = await fetch(`${API_URL}/api/calcular-dimensionamento/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dados)
@@ -92,7 +92,7 @@ function App() {
     }
 
     try {
-        const res = await fetch('${API_URL}/api/gerar-pdf/', {
+        const res = await fetch(`${API_URL}/api/gerar-pdf/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosCompletos)

@@ -15,7 +15,7 @@ O diferencial técnico do projeto é a integração completa entre um Frontend d
 
 ### 🌐 Demo Online
 O projeto está rodando em produção. Acesse e teste:
-👉 **[https://rmpav.vercel.app](https://rmpav.vercel.app)** (Substitua pelo seu link real)
+👉 ** https://vercel.com/iriovl01s-projects/rm-pav **
 
 ---
 

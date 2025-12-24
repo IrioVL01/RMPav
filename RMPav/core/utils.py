@@ -154,3 +154,5 @@ def calcular_espessura_usace(cbr, vdm, clima, anos):
         "espessura_final": round(espessura_final, 2),
         "categoria_trafego": f"VDM {vdm}"
     }
+
+

@@ -40,64 +40,63 @@ class GerarPDFView(APIView):
     def post(self, request):
         dados = request.data
 
-        # 1. Extração Segura (Garante que nada seja None)
+        # 1. Extração Segura dos Dados
         res_trafego = dados.get('resultado_trafego') or {}
         res_dim = dados.get('resultado_dim') or {}
 
-        # Dica: Convertendo tudo para string (str) ou valor padrão para evitar erro de NoneType
+        # 2. Mapeando os novos campos do MGLIT
         context_dict = {
+            # Dados Gerais
             'anos': str(dados.get('anos', '-')),
             'taxa': str(dados.get('taxa', '-')),
             'fator_faixa': str(dados.get('fator_faixa', '-')),
 
-            'n_total': str(res_trafego.get('n_total', 'Não calculado')),
-            'fator_climatico': str(res_trafego.get('fator_climatico_usado', '-')),
-            # Lista vazia se não tiver
-            'detalhes_trafego': res_trafego.get('detalhes', []),
+            # Novos Dados de Tráfego (AASHTO vs USACE)
+            'n_total_aashto': str(res_trafego.get('n_total_aashto', '-')),
+            'n_total_usace': str(res_trafego.get('n_total_usace', '-')),
+            # O maior dos dois
+            'n_final': str(res_trafego.get('n_final_projeto', '-')),
+            'metodo_escolhido': str(res_trafego.get('metodo_escolhido', '-')),
 
+            # Lista de veículos e Progressão
+            'detalhes_trafego': res_trafego.get('detalhes', []),
+            # Nova tabela ano a ano
+            'progressao': res_trafego.get('progressao', []),
+
+            # Dimensionamento
             'cbr': str(dados.get('cbr', '-')),
             'clima': str(dados.get('clima', '-')),
             'vdm_medio': str(dados.get('vdm_medio', '-')),
 
+            # Resultados Finais
             'espessura_base': str(res_dim.get('espessura_calculada', '-')),
             'perda': str(res_dim.get('perda_material', '-')),
             'espessura_final': str(res_dim.get('espessura_final', '-')),
         }
 
-        # 2. Caminho Manual do Arquivo
+        # 3. Caminho do Arquivo HTML
         diretorio_atual = os.path.dirname(os.path.abspath(__file__))
         caminho_html = os.path.join(
             diretorio_atual, 'templates', 'relatorio.html')
 
-        print(f"Lendo HTML em: {caminho_html}")
-
         try:
-            # 3. Lê o HTML do disco
             with open(caminho_html, 'r', encoding='utf-8') as arquivo:
                 html_string = arquivo.read()
 
-            # 4. Renderiza usando a ENGINE do Django (Mais robusto)
             django_engine = engines['django']
             template = django_engine.from_string(html_string)
             html_renderizado = template.render(context_dict)
 
-            # 5. Gera o PDF
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; filename="Memorial_RMPav.pdf"'
 
             pisa_status = pisa.CreatePDF(html_renderizado, dest=response)
 
             if pisa_status.err:
-                return Response({'erro': 'Erro interno na biblioteca PDF'}, status=500)
+                return Response({'erro': 'Erro interno PDF'}, status=500)
 
             return response
 
-        except FileNotFoundError:
-            print("ARQUIVO HTML NÃO ENCONTRADO!")
-            return Response({'erro': 'Template HTML sumiu'}, status=500)
         except Exception as e:
-            # Esse print vai nos dizer exatamente o que houve se der erro de novo
-            import traceback
-            traceback.print_exc()
-            print(f"ERRO CRÍTICO: {e}")
+            print(f"ERRO PDF: {e}")
             return Response({'erro': str(e)}, status=500)

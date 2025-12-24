@@ -4,109 +4,94 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 2cm;
+            margin: 1.5cm; /* Margem reduzida para evitar quebra de página */
         }
         
         body {
             font-family: Helvetica, sans-serif;
-            font-size: 12px;
+            font-size: 11px; /* Fonte levemente menor para caber tudo */
             color: #333;
         }
 
         .header {
             text-align: center;
-            border-bottom: 2px solid #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
         }
 
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin: 0;
-        }
+        h1 { color: #2c3e50; font-size: 20px; margin: 0; }
+        .subtitle { color: #7f8c8d; font-size: 10px; margin-top: 2px; }
         
         h2 {
-            font-size: 16px;
+            font-size: 14px;
             color: #fff;
             background-color: #34495e;
-            padding: 5px 10px;
-            margin-top: 20px;
+            padding: 4px 8px;
+            margin-top: 15px;
+            margin-bottom: 8px;
         }
 
-        /* Tabelas Simples e Robustas */
-        table {
-            width: 100%;
-            border-collapse: collapse; /* Importante para o PDF */
-        }
-        
-        th {
-            text-align: left;
-            background-color: #f2f2f2;
-            border-bottom: 1px solid #000;
-            padding: 8px;
-            font-weight: bold;
-        }
-        
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
+        /* Tabelas Otimizadas */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th { background-color: #f2f2f2; text-align: left; padding: 5px; border: 1px solid #ccc; font-weight: bold; font-size: 10px; }
+        td { padding: 5px; border: 1px solid #ccc; font-size: 10px; }
+
+        /* Caixas de Destaque */
+        .summary-box {
+            border: 1px solid #2980b9;
+            background-color: #f4faff;
+            padding: 10px;
+            margin-bottom: 10px;
         }
 
-        /* Caixa de Resultado sem firulas */
-        .result-box {
+        .final-box {
             border: 2px solid #e67e22;
             background-color: #fff8f0;
-            padding: 20px;
-            margin-top: 20px;
+            padding: 15px;
             text-align: center;
+            margin-top: 10px;
+            page-break-inside: avoid; /* Evita que o resultado final quebre no meio */
         }
 
-        .big-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #d35400;
-        }
+        .big-number { font-size: 24px; font-weight: bold; color: #d35400; display: block; margin-top: 5px; }
+        .label { font-size: 9px; color: #666; text-transform: uppercase; }
 
         .footer {
-            margin-top: 50px;
-            font-size: 10px;
-            text-align: center;
-            color: #999;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            text-align: center; font-size: 8px; color: #aaa;
+            border-top: 1px solid #eee; padding-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
     <div class="header">
         <h1>RMPav Web</h1>
-        <div>Memorial de Cálculo Rodoviário</div>
+        <div class="subtitle">Relatório Técnico - Método MGLIT Integrado</div>
     </div>
 
-    <!-- 1. DADOS GERAIS -->
+    <!-- 1. DADOS -->
     <h2>1. Parâmetros de Projeto</h2>
     <table>
         <tr>
             <td><strong>Anos de Projeto:</strong> {{ anos }}</td>
-            <td><strong>Taxa de Crescimento:</strong> {{ taxa }}%</td>
-            <td><strong>Fator de Faixa:</strong> {{ fator_faixa }}</td>
+            <td><strong>Taxa de Cresc.:</strong> {{ taxa }}%</td>
+            <td><strong>Fator Faixa:</strong> {{ fator_faixa }}</td>
         </tr>
     </table>
 
     <!-- 2. TRÁFEGO -->
-    <h2>2. Análise de Tráfego (N)</h2>
-    <p>Fator Climático Acumulado: {{ fator_climatico }}</p>
+    <h2>2. Análise de Tráfego</h2>
     
+    <!-- Tabela de Veículos -->
     <table>
         <thead>
             <tr>
-                <th width="30%">Classe</th>
-                <th width="20%">VDM</th>
-                <th width="25%">FV</th>
-                <th width="25%">N Parcial</th>
+                <th>Classe</th>
+                <th>VDM</th>
+                <th>FV (AASHTO)</th>
+                <th>FV (USACE)</th>
             </tr>
         </thead>
         <tbody>
@@ -114,46 +99,79 @@
             <tr>
                 <td>{{ item.classe }}</td>
                 <td>{{ item.vdm }}</td>
-                <td>{{ item.fv_calculado }}</td>
-                <td>{{ item.n_contribuição }}</td>
+                <td>{{ item.fv_aashto }}</td>
+                <td>{{ item.fv_usace }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <div style="text-align: right; margin-top: 10px; font-weight: bold;">
-        N Total: {{ n_total }}
+
+    <!-- Resumo Comparativo -->
+    <div class="summary-box">
+        <table style="border: none; margin: 0;">
+            <tr>
+                <td style="border: none; width: 50%;">N Total (AASHTO): <strong>{{ n_total_aashto }}</strong></td>
+                <td style="border: none; width: 50%;">N Total (USACE): <strong>{{ n_total_usace }}</strong></td>
+            </tr>
+        </table>
+        <div style="margin-top: 5px; font-size: 10px; color: #2980b9;">
+            Método Adotado (Maior N): <strong>{{ metodo_escolhido }}</strong>
+        </div>
     </div>
 
-    <!-- 3. DIMENSIONAMENTO -->
-    <h2>3. Dimensionamento</h2>
+    <!-- Tabela de Progressão (Resumida) -->
+    <h3>Progressão Anual Acumulada</h3>
     <table>
+        <thead>
+            <tr>
+                <th width="20%">Ano</th>
+                <th width="40%">N AASHTO (Acum.)</th>
+                <th width="40%">N USACE (Acum.)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in progressao %}
+            <tr>
+                <td>{{ p.ano }}</td>
+                <td>{{ p.n_aashto_acumulado }}</td>
+                <td>{{ p.n_usace_acumulado }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 3. DIMENSIONAMENTO -->
+    <h2>3. Dimensionamento (Revestimento Primário)</h2>
+    <table style="margin-bottom: 5px;">
         <tr>
             <td><strong>CBR Subleito:</strong> {{ cbr }}%</td>
             <td><strong>Clima:</strong> {{ clima }}</td>
-            <td><strong>VDM Médio:</strong> {{ vdm_medio }}</td>
+            <td><strong>VDM Médio Frota:</strong> {{ vdm_medio }}</td>
         </tr>
     </table>
 
-    <div class="result-box">
-        <table style="border: none;">
+    <div class="final-box">
+        <table style="border: none; width: 100%;">
             <tr>
                 <td style="border: none; text-align: center;">
-                    Espessura Base<br>
+                    <span class="label">Espessura Estrutural (USACE)</span><br>
                     <strong>{{ espessura_base }} cm</strong>
                 </td>
                 <td style="border: none; text-align: center;">
-                    (+) Gravel Loss<br>
+                    <span class="label">(+) Perda de Material (GL)</span><br>
                     <strong>{{ perda }} cm</strong>
                 </td>
             </tr>
         </table>
-        <br>
-        <div>ESPESSURA FINAL DE PROJETO</div>
-        <div class="big-number">{{ espessura_final }} cm</div>
+        
+        <hr style="border: 0; border-top: 1px solid #e67e22; margin: 10px 0;">
+        
+        <span class="label">ESPESSURA FINAL DE PROJETO</span>
+        <span class="big-number">{{ espessura_final }} cm</span>
     </div>
 
     <div class="footer">
-        Gerado por Sistema RMPav - Engenheiro Rairio Mota
+        Gerado por Sistema RMPav - Engenharia de Pavimentos
     </div>
 
 </body>

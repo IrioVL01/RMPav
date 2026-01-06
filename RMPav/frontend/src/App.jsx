@@ -298,7 +298,7 @@ function App() {
                                     </div>
                                 </div>
 
-                                <h4 className="font-bold text-xs text-gray-500 uppercase mb-2">Passos 8 a 11: Tabela de Tentativas</h4>
+                                <h4 className="font-bold text-xs text-gray-500 uppercase mb-2">Tabela de Tentativas</h4>
                                 <div className="overflow-x-auto mb-6 border rounded-lg">
                                     <table className="w-full text-xs text-center">
                                         <thead className="bg-gray-100 text-gray-600 font-bold">
@@ -327,7 +327,7 @@ function App() {
                                             <div className="text-xl font-bold">{resultadoDim.passo_12_media_cm} cm</div>
                                         </div>
                                         <div className="text-center p-3 bg-orange-50 border border-orange-100 rounded-lg">
-                                            <div className="text-[10px] uppercase font-bold text-orange-800">GL ()</div>
+                                            <div className="text-[10px] uppercase font-bold text-orange-800">GL </div>
                                             <div className="text-xl font-bold">{resultadoDim.passo_13_gl_cm} cm</div>
                                         </div>
                                         <div className="text-center p-3 bg-green-100 border border-green-200 rounded-lg shadow-sm">

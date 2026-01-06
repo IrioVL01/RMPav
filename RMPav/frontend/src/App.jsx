@@ -272,7 +272,7 @@ function App() {
                                 <div className="flex-1"><label className="label-input">S0</label><input type="number" className="input-field" value={so} onChange={e=>setSo(e.target.value)}/></div>
                             </div>
 
-                            <button onClick={calcularDimensionamento} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 shadow-md transition">CALCULAR 13 PASSOS</button>
+                            <button onClick={calcularDimensionamento} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 shadow-md transition">CALCULAR</button>
                         </div>
                     </div>
 
@@ -327,7 +327,7 @@ function App() {
                                             <div className="text-xl font-bold">{resultadoDim.passo_12_media_cm} cm</div>
                                         </div>
                                         <div className="text-center p-3 bg-orange-50 border border-orange-100 rounded-lg">
-                                            <div className="text-[10px] uppercase font-bold text-orange-800">GL (10 anos)</div>
+                                            <div className="text-[10px] uppercase font-bold text-orange-800">GL ()</div>
                                             <div className="text-xl font-bold">{resultadoDim.passo_13_gl_cm} cm</div>
                                         </div>
                                         <div className="text-center p-3 bg-green-100 border border-green-200 rounded-lg shadow-sm">

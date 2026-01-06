@@ -2,164 +2,104 @@
 <html>
 <head>
     <style>
-        @page {
-            size: a4 portrait;
-            margin: 1.5cm; /* Margem reduzida para evitar quebra de página */
-        }
-        
-        body {
-            font-family: Helvetica, sans-serif;
-            font-size: 11px; /* Fonte levemente menor para caber tudo */
-            color: #333;
-        }
-
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #2c3e50;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-        }
-
+        @page { size: a4 portrait; margin: 1.5cm; }
+        body { font-family: Helvetica, sans-serif; font-size: 11px; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #2c3e50; margin-bottom: 15px; padding-bottom: 5px; }
         h1 { color: #2c3e50; font-size: 20px; margin: 0; }
-        .subtitle { color: #7f8c8d; font-size: 10px; margin-top: 2px; }
-        
-        h2 {
-            font-size: 14px;
-            color: #fff;
-            background-color: #34495e;
-            padding: 4px 8px;
-            margin-top: 15px;
-            margin-bottom: 8px;
-        }
-
-        /* Tabelas Otimizadas */
+        .subtitle { color: #7f8c8d; font-size: 10px; }
+        h2 { font-size: 14px; color: #fff; background-color: #34495e; padding: 4px 8px; margin-top: 15px; margin-bottom: 8px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         th { background-color: #f2f2f2; text-align: left; padding: 5px; border: 1px solid #ccc; font-weight: bold; font-size: 10px; }
         td { padding: 5px; border: 1px solid #ccc; font-size: 10px; }
-
-        /* Caixas de Destaque */
-        .summary-box {
-            border: 1px solid #2980b9;
-            background-color: #f4faff;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .final-box {
-            border: 2px solid #e67e22;
-            background-color: #fff8f0;
-            padding: 15px;
-            text-align: center;
-            margin-top: 10px;
-            page-break-inside: avoid; /* Evita que o resultado final quebre no meio */
-        }
-
+        .final-box { border: 2px solid #e67e22; background-color: #fff8f0; padding: 15px; text-align: center; margin-top: 10px; page-break-inside: avoid; }
         .big-number { font-size: 24px; font-weight: bold; color: #d35400; display: block; margin-top: 5px; }
         .label { font-size: 9px; color: #666; text-transform: uppercase; }
-
-        .footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            text-align: center; font-size: 8px; color: #aaa;
-            border-top: 1px solid #eee; padding-top: 5px;
-        }
+        .info-grid td { border: none; padding: 2px 5px; }
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8px; color: #aaa; border-top: 1px solid #eee; padding-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>RMPav Web</h1>
-        <div class="subtitle">Relatório Técnico - RMPav Web</div>
+        <div class="subtitle">Memorial de Cálculo - Dimensionamento Avançado</div>
     </div>
 
-    <!-- 1. DADOS -->
+    <!-- 1. PARÂMETROS -->
     <h2>1. Parâmetros de Projeto</h2>
     <table>
         <tr>
-            <td><strong>Anos de Projeto:</strong> {{ anos }}</td>
-            <td><strong>Taxa de Cresc.:</strong> {{ taxa }}%</td>
-            <td><strong>Fator Faixa:</strong> {{ fator_faixa }}</td>
+            <td><strong>Anos:</strong> {{ anos }}</td>
+            <td><strong>Cresc.:</strong> {{ taxa }}%</td>
+            <td><strong>Faixa:</strong> {{ fator_faixa }}</td>
         </tr>
     </table>
 
     <!-- 2. TRÁFEGO -->
     <h2>2. Análise de Tráfego</h2>
-    
-    <!-- Tabela de Veículos -->
+    <table style="margin-bottom: 5px;">
+        <tr>
+            <td>N AASHTO: <strong>{{ n_total_aashto }}</strong></td>
+            <td>N USACE: <strong>{{ n_total_usace }}</strong></td>
+            <td style="background-color: #eafaf1;">N Final: <strong>{{ n_final }}</strong></td>
+        </tr>
+    </table>
+    <!-- Tabela resumida de veículos -->
     <table>
         <thead>
-            <tr>
-                <th>Classe</th>
-                <th>VDM</th>
-                <th>FV (AASHTO)</th>
-                <th>FV (USACE)</th>
-            </tr>
+            <tr><th>Classe</th><th>VDM</th><th>FV (AASHTO)</th><th>FV (USACE)</th></tr>
         </thead>
         <tbody>
             {% for item in detalhes_trafego %}
             <tr>
-                <td>{{ item.classe }}</td>
-                <td>{{ item.vdm }}</td>
-                <td>{{ item.fv_aashto }}</td>
-                <td>{{ item.fv_usace }}</td>
+                <td>{{ item.classe }}</td><td>{{ item.vdm }}</td><td>{{ item.fv_aashto }}</td><td>{{ item.fv_usace }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <!-- Resumo Comparativo -->
-    <div class="summary-box">
-        <table style="border: none; margin: 0;">
-            <tr>
-                <td style="border: none; width: 50%;">N Total (AASHTO): <strong>{{ n_total_aashto }}</strong></td>
-                <td style="border: none; width: 50%;">N Total (USACE): <strong>{{ n_total_usace }}</strong></td>
-            </tr>
-        </table>
-        <div style="margin-top: 5px; font-size: 10px; color: #2980b9;">
-            Método Adotado (Maior N): <strong>{{ metodo_escolhido }}</strong>
-        </div>
-    </div>
-
-    <!-- Tabela de Progressão (Resumida) -->
-    <h3>Progressão Anual Acumulada</h3>
+    <!-- 3. DIMENSIONAMENTO AVANÇADO -->
+    <h2>3. Parâmetros de Dimensionamento (AASHTO)</h2>
+    
+    <!-- Tabela de Propriedades do Solo e Clima -->
     <table>
-        <thead>
-            <tr>
-                <th width="20%">Ano</th>
-                <th width="40%">N AASHTO (Acum.)</th>
-                <th width="40%">N USACE (Acum.)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in progressao %}
-            <tr>
-                <td>{{ p.ano }}</td>
-                <td>{{ p.n_aashto_acumulado }}</td>
-                <td>{{ p.n_usace_acumulado }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- 3. DIMENSIONAMENTO -->
-    <h2>3. Dimensionamento (Revestimento Primário)</h2>
-    <table style="margin-bottom: 5px;">
         <tr>
-            <td><strong>CBR Subleito:</strong> {{ cbr }}%</td>
-            <td><strong>Clima:</strong> {{ clima }}</td>
-            <td><strong>VDM Médio Frota:</strong> {{ vdm_medio }}</td>
+            <th colspan="3">Propriedades dos Materiais</th>
+            <th colspan="2">Critérios de Serviço</th>
+        </tr>
+        <tr>
+            <td>CBR Subleito: <strong>{{ cbr }}%</strong></td>
+            <td>MR Seco: <strong>{{ mr_seco }} psi</strong></td>
+            <td>MR Úmido: <strong>{{ mr_umido }} psi</strong></td>
+            <td>ΔPSI: <strong>{{ delta_psi }}</strong></td>
+            <td>CASE: <strong>{{ case_value }} pol</strong></td>
         </tr>
     </table>
 
+    <!-- Tabela de Sazonalidade -->
+    <table>
+        <tr>
+            <th width="50%">Período Seco</th>
+            <th width="50%">Período Úmido</th>
+        </tr>
+        <tr>
+            <td>{{ meses_seco }} Meses</td>
+            <td>{{ meses_umido }} Meses</td>
+        </tr>
+    </table>
+
+    <!-- 4. RESULTADO FINAL -->
+   
     <div class="final-box">
         <table style="border: none; width: 100%;">
             <tr>
                 <td style="border: none; text-align: center;">
-                    <span class="label">Espessura Estrutural (USACE)</span><br>
-                    <strong>{{ espessura_base }} cm</strong>
+                    <span class="label">Espessura Estrutural</span><br>
+                    <strong>{{ espessura_estrutural }} cm</strong>
                 </td>
                 <td style="border: none; text-align: center;">
-                    <span class="label">(+) Perda de Material (GL)</span><br>
-                    <strong>{{ perda }} cm</strong>
+                    <span class="label">(+) Gravel Loss </span><br>
+                    <strong>{{ gravel_loss }} cm</strong>
                 </td>
             </tr>
         </table>
@@ -168,12 +108,9 @@
         
         <span class="label">ESPESSURA FINAL DE PROJETO</span>
         <span class="big-number">{{ espessura_final }} cm</span>
+        <span class="label" style="display:block; margin-top:5px">Revestimento Primário (Cascalho)</span>
     </div>
 
-    <div class="footer">
-        Gerado por Sistema RMPav - Engenharia de Pavimentos
-    </div>
 
 </body>
 </html>
-

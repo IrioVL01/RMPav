@@ -11,18 +11,18 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         th { background-color: #f2f2f2; text-align: left; padding: 5px; border: 1px solid #ccc; font-weight: bold; font-size: 10px; }
         td { padding: 5px; border: 1px solid #ccc; font-size: 10px; }
-        .final-box { border: 2px solid #e67e22; background-color: #fff8f0; padding: 15px; text-align: center; margin-top: 10px; page-break-inside: avoid; }
-        .big-number { font-size: 24px; font-weight: bold; color: #d35400; display: block; margin-top: 5px; }
-        .label { font-size: 9px; color: #666; text-transform: uppercase; }
-        .info-grid td { border: none; padding: 2px 5px; }
         .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8px; color: #aaa; border-top: 1px solid #eee; padding-top: 5px; }
+        /* Classe para esconder coisas */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>RMPav Web</h1>
-        <div class="subtitle">Memorial de Cálculo - Dimensionamento Avançado</div>
+        <div class="subtitle">
+            {% if ocultar_dimensionamento %}Relatório de Tráfego{% else %}Memorial de Cálculo Completo{% endif %}
+        </div>
     </div>
 
     <!-- 1. PARÂMETROS -->
@@ -44,7 +44,8 @@
             <td style="background-color: #eafaf1;">N Final: <strong>{{ n_final }}</strong></td>
         </tr>
     </table>
-    <!-- Tabela resumida de veículos -->
+    
+    <h3>Veículos</h3>
     <table>
         <thead>
             <tr><th>Classe</th><th>VDM</th><th>FV (AASHTO)</th><th>FV (USACE)</th></tr>
@@ -58,10 +59,31 @@
         </tbody>
     </table>
 
-    <!-- 3. DIMENSIONAMENTO AVANÇADO -->
+    <!-- Tabela de Progressão (Substitui o gráfico no PDF) -->
+    <h3>Evolução Anual do N (Acumulado)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th width="20%">Ano</th>
+                <th width="40%">N AASHTO</th>
+                <th width="40%">N USACE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in progressao %}
+            <tr>
+                <td>{{ p.ano }}</td>
+                <td>{{ p.n_aashto_acumulado }}</td>
+                <td>{{ p.n_usace_acumulado }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if not ocultar_dimensionamento %}
+    <!-- 3. DIMENSIONAMENTO -->
     <h2>3. Parâmetros de Dimensionamento (AASHTO)</h2>
     
-    <!-- Tabela de Propriedades do Solo e Clima -->
     <table>
         <tr>
             <th colspan="3">Propriedades dos Materiais</th>
@@ -76,41 +98,20 @@
         </tr>
     </table>
 
-    <!-- Tabela de Sazonalidade -->
-    <table>
-        <tr>
-            <th width="50%">Período Seco</th>
-            <th width="50%">Período Úmido</th>
-        </tr>
-        <tr>
-            <td>{{ meses_seco }} Meses</td>
-            <td>{{ meses_umido }} Meses</td>
-        </tr>
-    </table>
-
-    <!-- 4. RESULTADO FINAL -->
-   
-    <div class="final-box">
+    <h3>Resultados Finais</h3>
+    <div style="border: 2px solid #e67e22; background-color: #fff8f0; padding: 15px; text-align: center;">
         <table style="border: none; width: 100%;">
             <tr>
-                <td style="border: none; text-align: center;">
-                    <span class="label">Espessura Estrutural</span><br>
-                    <strong>{{ espessura_estrutural }} cm</strong>
-                </td>
-                <td style="border: none; text-align: center;">
-                    <span class="label">(+) Gravel Loss </span><br>
-                    <strong>{{ gravel_loss }} cm</strong>
-                </td>
+                <td style="border: none; text-align: center;">Espessura Estrutural<br><strong>{{ espessura_estrutural }} cm</strong></td>
+                <td style="border: none; text-align: center;">(+) Gravel Loss<br><strong>{{ gravel_loss }} cm</strong></td>
             </tr>
         </table>
-        
-        <hr style="border: 0; border-top: 1px solid #e67e22; margin: 10px 0;">
-        
-        <span class="label">ESPESSURA FINAL DE PROJETO</span>
-        <span class="big-number">{{ espessura_final }} cm</span>
-        <span class="label" style="display:block; margin-top:5px">Revestimento Primário (Cascalho)</span>
+        <hr>
+        <span style="font-size: 20px; font-weight: bold; color: #d35400;">{{ espessura_final }} cm</span>
     </div>
+    {% endif %}
 
-
+    <div class="footer">Gerado por Sistema RMPav</div>
 </body>
 </html>
+

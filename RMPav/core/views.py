@@ -9,6 +9,22 @@ from xhtml2pdf import pisa
 from .serializers import CalculoTrafegoInputSerializer, DimensionamentoInputSerializer
 from .utils import calcular_n_total, calcular_espessura_usace, calcular_13_passos
 
+# --- FUNÇÃO AUXILIAR PARA NOTAÇÃO CIENTÍFICA ---
+
+
+def format_scientific(val):
+    """Converte números para string em notação científica (Ex: 1.50e+5)"""
+    try:
+        # Tenta converter para float
+        numero = float(val)
+        if numero == 0:
+            return "0"
+        # Formata com 2 casas decimais (1.23e+05)
+        return "{:.2e}".format(numero)
+    except (ValueError, TypeError):
+        # Se for texto ou traço '-', devolve como está
+        return str(val)
+
 # 1. TRÁFEGO
 
 
@@ -51,36 +67,24 @@ class Calcular13PassosView(APIView):
         except Exception as e:
             return Response({"erro": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-# 4. GERAR PDF COMPLETO (FINAL BLINDADO)
+# 4. GERAR PDF COMPLETO (FINAL)
 
 
 class GerarPDFView(APIView):
     def post(self, request):
         dados = request.data
 
-        # --- DEBUG: OLHE NO SEU TERMINAL PRETO QUANDO CLICAR NO BOTÃO ---
-        print("--- DEBUG PDF: DADOS RECEBIDOS ---")
-        res_dim = dados.get('resultado_dim')
-        print(f"Resultado Dim: {res_dim}")
-        # ----------------------------------------------------------------
-
-        if not res_dim:
-            res_dim = {}
-
         res_trafego = dados.get('resultado_trafego') or {}
+        res_dim = dados.get('resultado_dim') or {}
 
-        # --- LÓGICA DE EXTRAÇÃO FORÇADA ---
-
-        # 1. MRs (Tenta pegar do dicionário ou direto)
+        # Lógica de extração segura
         mrs = res_dim.get('passo_5_mrs') or {}
-        # Se mrs for string (erro comum), transforma em dict vazio
         if not isinstance(mrs, dict):
             mrs = {}
 
-        mr_seco = mrs.get('seco') or res_dim.get('mr_seco_psi', '-')
-        mr_umido = mrs.get('umido') or res_dim.get('mr_umido_psi', '-')
+        mr_seco_raw = mrs.get('seco') or res_dim.get('mr_seco_psi', '-')
+        mr_umido_raw = mrs.get('umido') or res_dim.get('mr_umido_psi', '-')
 
-        # 2. Espessuras (Tenta chaves do método novo, se falhar, tenta método antigo)
         esp_estrutural = res_dim.get('passo_12_media_cm')
         if esp_estrutural is None:
             esp_estrutural = res_dim.get('espessura_estrutural_cm', '-')
@@ -93,18 +97,32 @@ class GerarPDFView(APIView):
         if esp_final is None:
             esp_final = res_dim.get('espessura_total_cm', '-')
 
+        # Prepara a lista de detalhes formatada
+        detalhes_raw = res_trafego.get('detalhes', [])
+        detalhes_formatados = []
+        for item in detalhes_raw:
+            detalhes_formatados.append({
+                'classe': item.get('classe'),
+                'vdm': item.get('vdm'),
+                'fv_aashto': item.get('fv_aashto'),
+                'fv_usace': item.get('fv_usace'),
+                # Formata o N Parcial
+                'n_contribuição': format_scientific(item.get('n_contribuição', 0))
+            })
+
         context_dict = {
             # GERAL
             'anos': str(dados.get('anos', '-')),
             'taxa': str(dados.get('taxa', '-')),
             'fator_faixa': str(dados.get('fator_faixa', '-')),
 
-            # TRÁFEGO
-            'n_total_aashto': str(res_trafego.get('n_total_aashto', '-')),
-            'n_total_usace': str(res_trafego.get('n_total_usace', '-')),
-            'n_final': str(res_trafego.get('n_final_projeto', '-')),
+            # TRÁFEGO (COM NOTAÇÃO CIENTÍFICA)
+            'n_total_aashto': format_scientific(res_trafego.get('n_total_aashto', 0)),
+            'n_total_usace': format_scientific(res_trafego.get('n_total_usace', 0)),
+            'n_final': format_scientific(res_trafego.get('n_final_projeto', 0)),
+
             'metodo_escolhido': str(res_trafego.get('metodo_escolhido', '-')),
-            'detalhes_trafego': res_trafego.get('detalhes', []),
+            'detalhes_trafego': detalhes_formatados,
             'progressao': res_trafego.get('progressao', []),
 
             # DIMENSIONAMENTO
@@ -116,9 +134,11 @@ class GerarPDFView(APIView):
             'delta_psi': str(dados.get('delta_psi', '-')),
             'case_value': str(dados.get('case_value', '-')),
 
-            # RESULTADOS FINAIS
-            'mr_seco': str(mr_seco),
-            'mr_umido': str(mr_umido),
+            # RESULTADOS FINAIS (MRs CIENTÍFICOS)
+            'mr_seco': format_scientific(mr_seco_raw),
+            'mr_umido': format_scientific(mr_umido_raw),
+
+            # Espessuras mantemos decimal para leitura de obra (cm)
             'espessura_estrutural': str(esp_estrutural),
             'gravel_loss': str(gravel_loss),
             'espessura_final': str(esp_final),
@@ -136,17 +156,43 @@ class GerarPDFTrafegoView(APIView):
         dados = request.data
         res_trafego = dados.get('resultado_trafego') or {}
 
+        # Formata detalhes
+        detalhes_raw = res_trafego.get('detalhes', [])
+        detalhes_formatados = []
+        for item in detalhes_raw:
+            detalhes_formatados.append({
+                'classe': item.get('classe'),
+                'vdm': item.get('vdm'),
+                'fv_aashto': item.get('fv_aashto'),
+                'fv_usace': item.get('fv_usace'),
+                'n_contribuição': format_scientific(item.get('n_contribuição', 0))
+            })
+
+        # Formata progressão anual
+        progressao_raw = res_trafego.get('progressao', [])
+        progressao_formatada = []
+        for item in progressao_raw:
+            progressao_formatada.append({
+                'ano': item.get('ano'),
+                'n_aashto_acumulado': format_scientific(item.get('n_aashto_acumulado', 0)),
+                'n_usace_acumulado': format_scientific(item.get('n_usace_acumulado', 0))
+            })
+
         context_dict = {
             'tipo_relatorio': 'Parcial - Análise de Tráfego',
             'anos': str(dados.get('anos', '-')),
             'taxa': str(dados.get('taxa', '-')),
             'fator_faixa': str(dados.get('fator_faixa', '-')),
-            'n_total_aashto': str(res_trafego.get('n_total_aashto', '-')),
-            'n_total_usace': str(res_trafego.get('n_total_usace', '-')),
-            'n_final': str(res_trafego.get('n_final_projeto', '-')),
+
+            # FORMATADOS
+            'n_total_aashto': format_scientific(res_trafego.get('n_total_aashto', 0)),
+            'n_total_usace': format_scientific(res_trafego.get('n_total_usace', 0)),
+            'n_final': format_scientific(res_trafego.get('n_final_projeto', 0)),
+
             'metodo_escolhido': str(res_trafego.get('metodo_escolhido', '-')),
-            'detalhes_trafego': res_trafego.get('detalhes', []),
-            'progressao': res_trafego.get('progressao', []),
+            'detalhes_trafego': detalhes_formatados,
+            'progressao': progressao_formatada,
+
             'ocultar_dimensionamento': True
         }
 
